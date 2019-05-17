@@ -67,6 +67,21 @@ public final class KotlinDefaultArgumentsFilter implements IFilter {
 				final IFilterOutput output) {
 			cursor = methodNode.instructions.getFirst();
 
+			nextIs(Opcodes.IFNULL);
+			nextIsType(Opcodes.NEW, "java/lang/UnsupportedOperationException");
+			nextIs(Opcodes.DUP);
+			nextIs(Opcodes.LDC);
+			nextIsInvoke(Opcodes.INVOKESPECIAL,
+					"java/lang/UnsupportedOperationException", "<init>",
+					"(Ljava/lang/String;)V");
+			nextIs(Opcodes.ATHROW);
+			if (cursor != null) {
+				output.ignore(methodNode.instructions.getFirst(), cursor);
+				next();
+			} else {
+				cursor = methodNode.instructions.getFirst();
+			}
+
 			final Set<AbstractInsnNode> ignore = new HashSet<AbstractInsnNode>();
 			final int maskVar = Type.getMethodType(methodNode.desc)
 					.getArgumentTypes().length - 2;
